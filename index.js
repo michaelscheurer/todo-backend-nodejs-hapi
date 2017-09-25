@@ -3,7 +3,8 @@ const Inert = require('inert');
 const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
 const Joi = require('joi');
-var mysql = require('mysql');
+var database = require('./database');
+
 
 var todos = {
     1: {title: 'build an API', order: 1, completed: false},
@@ -227,6 +228,11 @@ server.route({
     }
 });
 
+//make db connection
+//database.makeDbConnection();
+
 server.start((err) => {
     console.log('Server running at:', server.info.uri);
 });
+
+
