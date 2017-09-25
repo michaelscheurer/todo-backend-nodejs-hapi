@@ -3,6 +3,7 @@ const Inert = require('inert');
 const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
 const Joi = require('joi');
+var mysql = require('mysql');
 
 var todos = {
     1: {title: 'build an API', order: 1, completed: false},
