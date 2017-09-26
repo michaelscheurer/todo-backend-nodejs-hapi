@@ -3,6 +3,7 @@ const Inert = require('inert');
 const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
 const Joi = require('joi');
+const async = require('async');
 var database = require('./database');
 
 
@@ -34,7 +35,7 @@ var getTodo = function (id) {
     return result;
 };
 
-const server = new Hapi.Server();
+global.server = new Hapi.Server();
 server.connection({
     host: '127.0.0.1',
     port: 5000,
@@ -69,11 +70,13 @@ server.route({
     method: 'GET',
     path: '/todos/',
     handler: function (request, reply) {
-        var result = [];
-        for(var key in todos) {
-            result.push(getTodo(key));
-        }
-        reply(result).code(200);
+        
+        function dbCallback(todos) {
+            reply(todos).code(200);
+        };
+        
+        database.getAllTodos(dbCallback);
+        
     },
     config: {
         tags: ['api'],
@@ -109,13 +112,14 @@ server.route({
     method: 'POST',
     path: '/todos/',
     handler: function (request, reply) {
-        todos[nextId] = {
-            title: request.payload.title,
-            order: request.payload.order || 0,
-            completed: request.payload.completed || false
-        }
-        nextId++;
-        reply(getTodo(nextId - 1)).code(201);
+        
+        database.insertTodo(
+            request.payload.title, 
+            request.payload.order || 0, 
+            request.payload.completed || false
+        );
+        
+        reply().code(201);
     },
     config: {
         tags: ['api'],
