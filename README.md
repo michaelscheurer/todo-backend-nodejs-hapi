@@ -10,7 +10,15 @@ You can run validate the application with https://www.todobackend.com/specs/inde
 # Extended todo-backend-nodejs-hapi by michael scheurer (11-107-604)
 
 ## Database
-The application uses mysql as a persitant databaseds
+The application uses mysql as a persitant database
 
-npm install mysql
+database credentials can be found in the database.js file
+
+A running mysql database is required
+
+##server
+
+## tags
+
+## todos
 
