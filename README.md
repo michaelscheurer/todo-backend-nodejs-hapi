@@ -16,7 +16,7 @@ database credentials can be found in the database.js file
 
 A running mysql database is required
 
-##server
+## server
 
 ## tags
 

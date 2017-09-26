@@ -9,6 +9,10 @@ const swaggerOptions = {
         {
             description: 'TODO operations',
             name: 'todos'
+        },
+        {
+            description: "TAG operations",
+            name: 'tags'
         }
     ]
 };

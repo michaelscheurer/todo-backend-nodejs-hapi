@@ -44,7 +44,7 @@ server.route({
     path: '/tags/',
     handler: function (request, reply) {
         
-        database.insertTodo(
+        database.insertTag(
             request.payload.title
         );
         
