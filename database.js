@@ -111,31 +111,36 @@ function processSqlToArray(results) {
  * DATABASE OPERATIONS TAGS TABLE
  * 
  */
-
+//get all tags from database
 exports.getAllTags = function (callback) {
     var sql = "SELECT * FROM " + databaseName + ".tags";
     con.query(sql, function (err, result) {
         if(err) throw err;        
         
+        console.log("Read all tags from database");
         callback(processSqlTagToArray(result));
     });
 };
 
+//get a specific tag by id from database
 exports.getTag = function (callback, tagId) {
     var sql = "SELECT * FROM " + databaseName + ".tags WHERE id = '" + tagId + "'";
     con.query(sql, function (err, result) {
        if(err) throw err;
        
+       console.log("Get tag id " + tagId);
        callback(processSqlTagToArray(result));
     });
 };
 
-exports.insertTag = function (title) {
+//insert new tag into database
+exports.insertTag = function (callback, title) {
     var sql = "INSERT INTO "+databaseName+".tags (title) VALUES('"+title+"')";
     con.query(sql, function (err, result) {
-       if(err) throw err;
-       console.log("Tag inserted");
-       return result;
+        if(err) throw err;
+       
+        console.log("Tag inserted");
+        callback(result);
     });
 };
 
@@ -147,6 +152,17 @@ exports.updateTag = function (callback, tagId, title) {
         
         console.log("Tag updated");
         callback(result);
+    });
+};
+
+//delete tag by id from database
+exports.deleteTagById = function (callback, tagId) {
+    var sql = "DELETE FROM " + databaseName + ".tags WHERE id = '" + tagId + "'";
+    con.query(sql, function(err, result) {
+       if(err) throw err;
+       
+       console.log("Tag with id " + tagId + " deleted");
+       callback(result);
     });
 };
 

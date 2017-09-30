@@ -44,11 +44,11 @@ server.route({
     path: '/tags/',
     handler: function (request, reply) {
         
-        database.insertTag(
-            request.payload.title
-        );
+        function dbCallback(result) {
+            reply(result).code(201);
+        }
         
-        reply().code(201);
+        database.insertTag(dbCallback, request.payload.title);        
     },
     config: {
         tags: ['api'],
@@ -125,6 +125,33 @@ server.route({
                 description: 'Success',
                 schema: tagResourceSchema.label('Result')
             },
+            404: {description: 'Tag not found'}
+        }}}
+    }
+});
+
+server.route({
+    method: 'DELETE',
+    path: '/tags/{tag_id}',
+    handler: function (request, reply) {
+        
+        function dbCallback(result) {
+            reply(result).code(204);
+        }
+        
+        database.deleteTagById(dbCallback, request.params.tag_id);
+
+    },
+    config: {
+        tags: ['api'],
+        description: 'Delete a given tag',
+        validate: {
+            params: {
+                tag_id: tagIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            204: {description: 'Tag deleted'},
             404: {description: 'Tag not found'}
         }}}
     }
