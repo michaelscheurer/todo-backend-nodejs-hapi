@@ -104,12 +104,12 @@ server.route({
     method: 'GET',
     path: '/todos/{todo_id}',
     handler: function (request, reply) {
-        response = getTodo(request.params.todo_id);
-        if (response === false){
-            reply().code(404);
-        } else {
-            reply(response).code(200);
-        }
+        
+        function dbCallback(todos) {            
+            reply(todos).code(200);
+        };
+        
+        database.getTodo(dbCallback, request.params.todo_id);
     },
     config: {
         tags: ['api'],

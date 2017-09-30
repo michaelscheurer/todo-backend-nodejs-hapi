@@ -69,13 +69,23 @@ exports.insertTodo = function (title, ordering, completed) {
 
 //get all todos using callback function
 exports.getAllTodos = function (callback) {
-    var sql = "SELECT * FROM "+databaseName+".todos";
+    var sql = "SELECT * FROM " + databaseName + ".todos";
     con.query(sql, function (err, result) {
         if(err) throw err;            
         
         callback(processSqlToArray(result));
     });
 };
+
+//get a specific todo by id using callback function
+exports.getTodo = function(callback, todoId) {
+    var sql = "SELECT * FROM " + databaseName +".todos WHERE id = '" + todoId + "'";
+    con.query(sql, function (err, result) {
+        if(err) throw err;
+        
+        callback(processSqlToArray(result));
+    });
+}
 
 //helper function. Brings sql request into the right order for the API
 function processSqlToArray(results) {
