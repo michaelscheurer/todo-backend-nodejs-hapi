@@ -66,3 +66,66 @@ server.route({
         }}}
     }
 });
+
+//Fetch a tag by id
+server.route({
+    method: 'GET',
+    path: '/tags/{tag_id}',
+    handler: function (request, reply) {
+        
+        function dbCallback(tags) {            
+            reply(tags).code(200);
+        };
+        
+        database.getTag(dbCallback, request.params.tag_id);
+    },
+    config: {
+        tags: ['api'],
+        description: 'Fetch a given tag',
+        validate: {
+            params: {
+                tag_id: tagIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: tagResourceSchema.label('Result')
+            },
+            404: {description: 'Tag not found'}
+        }}}
+    }
+});
+
+//Update a tag by id
+server.route({
+    method: 'PATCH',
+    path: '/tags/{tag_id}',
+    handler: function (request, reply) {
+        
+        function dbCallback(answer) {
+            reply(answer).code(200);
+        }
+        
+        database.updateTag(dbCallback, request.params.tag_id, request.payload.title);
+    },
+    config: {
+        tags: ['api'],
+        description: 'Update a given tag',
+        validate: {
+            params: {
+                tag_id: tagIdSchema
+            },
+            payload: {
+                title: Joi.string()
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: tagResourceSchema.label('Result')
+            },
+            404: {description: 'Tag not found'}
+        }}}
+    }
+});

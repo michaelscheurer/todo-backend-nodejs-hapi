@@ -121,6 +121,15 @@ exports.getAllTags = function (callback) {
     });
 };
 
+exports.getTag = function (callback, tagId) {
+    var sql = "SELECT * FROM " + databaseName + ".tags WHERE id = '" + tagId + "'";
+    con.query(sql, function (err, result) {
+       if(err) throw err;
+       
+       callback(processSqlTagToArray(result));
+    });
+};
+
 exports.insertTag = function (title) {
     var sql = "INSERT INTO "+databaseName+".tags (title) VALUES('"+title+"')";
     con.query(sql, function (err, result) {
@@ -130,6 +139,18 @@ exports.insertTag = function (title) {
     });
 };
 
+//update tag by id
+exports.updateTag = function (callback, tagId, title) {
+    var sql = "UPDATE " + databaseName + ".tags SET title = '" + title + "' WHERE id = '" + tagId + "'";
+    con.query(sql, function (err, result) {
+        if(err) throw err;
+        
+        console.log("Tag updated");
+        callback(result);
+    });
+};
+
+//helper function to generate proper tag json object
 function processSqlTagToArray (results) {
     var tags = [];
     
