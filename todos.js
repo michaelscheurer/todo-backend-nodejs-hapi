@@ -1,10 +1,3 @@
-var todos = {
-    1: {title: 'build an API', order: 1, completed: false},
-    2: {title: '?????', order: 2, completed: false},
-    3: {title: 'profit!', order: 3, completed: false}
-};
-var nextId = 4;
-
 var todoResourceSchema = Joi.object({
     title: Joi.string(),
     completed: Joi.boolean(),
@@ -14,17 +7,6 @@ var todoResourceSchema = Joi.object({
 
 var todoIdSchema = Joi.number().integer().positive()
     .required().description('The Todo ID');
-
-var getTodo = function (id) {
-    if( !(id in todos)) { return false; }
-    var result = {
-        title: todos[id].title,
-        completed: todos[id].completed,
-        order: todos[id].order,
-        url: server.info.uri + '/todos/' + id
-    }
-    return result;
-};
 
 server.route({
     method: 'GET',
@@ -68,32 +50,32 @@ server.route({
     }
 });
 
+//Tag a todo
 server.route({
     method: 'POST',
-    path: '/todos/',
+    path: '/todos/{todo_id}',
     handler: function (request, reply) {
         
-        database.insertTodo(
-            request.payload.title, 
-            request.payload.order || 0, 
-            request.payload.completed || false
-        );
+        function dbCallback(result) {
+            reply(result).code(201);
+        }
         
-        reply().code(201);
+        database.tagTodo(dbCallback, request.params.todo_id, request.payload.titles);        
     },
     config: {
         tags: ['api'],
-        description: 'Create a todo',
+        description: 'Tag a todo (multiple tags comma separated. Tag which does not exist will be ignored)',
         validate: {
+            params: {
+                todo_id: todoIdSchema
+            },
             payload: {
-                title: Joi.string().required(),
-                order: Joi.number().integer(),
-                completed: Joi.boolean()
+                titles: Joi.string().required()
             }
         },
         plugins: {'hapi-swagger': {responses: {
             201: {
-                description: 'Created',
+                description: 'Todo was taged',
                 schema: todoResourceSchema.label('Result')
             }
         }}}

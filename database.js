@@ -181,3 +181,40 @@ function processSqlTagToArray (results) {
     
     return tags;
 };
+
+/**
+ * 
+ * Database operations on the todos_tags table
+ * 
+ */
+
+//tag a todo with (optional) multiple tags
+/**
+ * @todo: check, if todo_id exists
+ * @todo: insert new tag, if not exists
+ * @todo: return result to callback function
+ */
+exports.tagTodo = function (callback, todoId, tags) {
+    splitedTags = tags.split(",");
+    console.log(splitedTags);
+    
+    //Check each tag, if already in table.
+    splitedTags.forEach( function (item) {
+        var sql = "SELECT id FROM " + databaseName + ".tags WHERE title = '" + item + "'";
+        con.query(sql, function (err, result) {
+            if(err) throw err;
+            
+            result = JSON.parse(JSON.stringify(result));
+            
+            if(result.length != 0) {
+                //insert into tags_todos
+                var sqlTodosTags = "INSERT INTO " + databaseName + ".todos_tags (todo_id, tag_id) VALUES ('" + todoId + "', '" + result[0].id + "')";
+                con.query(sqlTodosTags, function(err, resultTodosTags) {
+                   if(err) throw err;                   
+                });
+            }
+        });
+    });  
+    
+    callback("success");
+};
