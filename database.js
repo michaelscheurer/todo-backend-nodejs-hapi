@@ -2,28 +2,6 @@ var init_database = require("./initialize_database");
 var con = init_database.con;
 var databaseName = init_database.databaseName;
 
-/**
- * 
- * DATABASE OPERATIONS TAGS TABLE
- * 
- */
-
-//update tag by id
-exports.updateTag = function (callback, tagId, title) {
-    var sql = "UPDATE " + databaseName + ".tags SET title = '" + title + "' WHERE id = '" + tagId + "'";
-    con.query(sql, function (err, result) {
-        if(err) throw err;
-        
-        console.log("Tag updated");
-        callback(result);
-    });
-};
-
-/**
- * 
- * Database operations on the todos_tags table
- * 
- */
 
 //tag a todo with (optional) multiple tags
 /**
@@ -191,3 +169,27 @@ function processResult(results, table) {
     return entries;
 };
 
+//update
+exports.update = function (callback, setTitles, setValues, table, id) {
+    var sql = "UPDATE " + databaseName + "." + table + " SET " + getSet(setTitles, setValues) + " WHERE id = '" + id + "'";
+    
+    con.query(sql, function (err, result) {
+        if(err) throw err;
+        
+        console.log("Tag updated");
+        callback(result);
+    });
+};
+
+//helper function for update
+function getSet(setTitles, setValues) {
+    
+    var sql = "";
+    
+    for(var i = 0; i < setTitles.length; i++) {
+        sql += setTitles[i] + " = '" + setValues[i] + "', ";
+    }
+    
+    sql = sql.slice(0, -2);
+    return sql;
+}

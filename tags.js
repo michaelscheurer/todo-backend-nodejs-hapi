@@ -99,7 +99,7 @@ server.route({
             reply(answer).code(200);
         }
         
-        database.updateTag(dbCallback, request.params.tag_id, request.payload.title);
+        database.update(dbCallback, ["title"], [request.payload.title], "tags", request.params.tag_id);
     },
     config: {
         tags: ['api'],
