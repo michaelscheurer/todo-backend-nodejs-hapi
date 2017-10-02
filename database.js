@@ -190,9 +190,10 @@ function processSqlTagToArray (results) {
 
 //tag a todo with (optional) multiple tags
 /**
+ * @todo: check if the combination of todo_id and tag_id exists
  * @todo: check, if todo_id exists
- * @todo: insert new tag, if not exists
- * @todo: return result to callback function
+ * @todo: create new tag, if not exists
+ * @todo: return json result to callback function
  */
 exports.tagTodo = function (callback, todoId, tags) {
     splitedTags = tags.split(",");
@@ -217,4 +218,31 @@ exports.tagTodo = function (callback, todoId, tags) {
     });  
     
     callback("success");
+};
+
+//List all todos with a specific tag
+exports.getAllTodosOfTag = function (callback, tagId) {
+    var sql = "SELECT todos_tags.tag_id AS todos_tagsId, todos.id AS id, todos.title AS title, todos.ordering AS ordering, todos.completed AS completed FROM " + databaseName + ".todos_tags JOIN " + databaseName + ".todos ON todos_tags.todo_id = todos.id  WHERE todos_tags.tag_id = '" + tagId + "'";
+    con.query(sql, function (err, result) {
+       if(err) throw err;
+        result = processSqlToArray(result); 
+        
+        console.log(result);
+        
+        console.log("Getting all todos of the tag");
+        callback(result);
+    });
+};
+
+
+//List all tags of a todo
+exports.getAllTagsOfTodo = function (callback, todoId) {
+    var sql = "SELECT todos_tags.todo_id AS todos_tagsId, tags.id AS id, tags.title AS title FROM " + databaseName + ".todos_tags JOIN " + databaseName + ".tags ON todos_tags.tag_id = tags.id  WHERE todos_tags.todo_id = '" + todoId + "'";
+    con.query(sql, function (err, result) {
+       if(err) throw err;
+        result = processSqlTagToArray(result);             
+        
+        console.log("Getting all tags of a todo");
+        callback(result);
+    });
 };

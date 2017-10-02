@@ -8,3 +8,4 @@ const server = require('./server');
 
 var tags = require('./tags');
 var todos = require('./todos');
+var todos_tags = require('./todos_tags');

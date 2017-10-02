@@ -7,32 +7,35 @@ var todoResourceSchema = Joi.object({
 
 var todoIdSchema = Joi.number().integer().positive()
     .required().description('The Todo ID');
+    
+exports.todoResourceSchema = todoResourceSchema;
+exports.todoIdSchema = todoIdSchema;
 
-server.route({
-    method: 'GET',
-    path: '/todos/',
-    handler: function (request, reply) {
-        
-        function dbCallback(todos) {
-            reply(todos).code(200);
-        };
-        
-        database.getAllTodos(dbCallback);
-        
-    },
-    config: {
-        tags: ['api'],
-        description: 'List all todos',
-        plugins: {'hapi-swagger': {responses: {
-            200: {
-                description: 'Success',
-                schema: Joi.array().items(
-                    todoResourceSchema.label('Result')
-                )
-            }
-        }}}
-    }
-});
+//server.route({
+//    method: 'GET',
+//    path: '/todos/',
+//    handler: function (request, reply) {
+//        
+//        function dbCallback(todos) {
+//            reply(todos).code(200);
+//        };
+//        
+//        database.getAllTodos(dbCallback);
+//        
+//    },
+//    config: {
+//        tags: ['api'],
+//        description: 'List all todos',
+//        plugins: {'hapi-swagger': {responses: {
+//            200: {
+//                description: 'Success',
+//                schema: Joi.array().items(
+//                    todoResourceSchema.label('Result')
+//                )
+//            }
+//        }}}
+//    }
+//});
 
 server.route({
     method: 'DELETE',
@@ -82,34 +85,7 @@ server.route({
     }
 });
 
-server.route({
-    method: 'GET',
-    path: '/todos/{todo_id}',
-    handler: function (request, reply) {
-        
-        function dbCallback(todos) {            
-            reply(todos).code(200);
-        };
-        
-        database.getTodo(dbCallback, request.params.todo_id);
-    },
-    config: {
-        tags: ['api'],
-        description: 'Fetch a given todo',
-        validate: {
-            params: {
-                todo_id: todoIdSchema
-            }
-        },
-        plugins: {'hapi-swagger': {responses: {
-            200: {
-                description: 'Success',
-                schema: todoResourceSchema.label('Result')
-            },
-            404: {description: 'Todo not found'}
-        }}}
-    }
-});
+
 
 server.route({
     method: 'PATCH',

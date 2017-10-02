@@ -10,6 +10,9 @@ var tagResourceSchema = Joi.object({
 
 var tagIdSchema = Joi.number().integer().positive()
     .required().description('The tag ID');
+    
+exports.tagResourceSchema = tagResourceSchema;
+exports.tagIdSchema = tagIdSchema;
  
 //list all tags GET /tags/
 server.route({
