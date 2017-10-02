@@ -129,6 +129,80 @@ server.route({
     }
 });
 
+//Update a todo by id
+server.route({
+    method: 'PATCH',
+    path: '/todos/{todo_id}',
+    handler: function (request, reply) {
+        
+        function dbCallback(todos) {
+            reply(todos).code(200);
+        }
+        
+        database.update(
+            dbCallback, 
+            ["title", "ordering", "completed"], 
+            [request.payload.title, request.payload.order, request.payload.completed], 
+            "todos", 
+            request.params.todo_id);
+    },
+    config: {
+        tags: ['api'],
+        description: 'Update a given tag',
+        validate: {
+            params: {
+                todo_id: schemas.todoIdSchema
+            },
+            payload: {
+                title: Joi.string(),
+                order: Joi.number().integer(),
+                completed: Joi.boolean()
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {description: 'Todo not found'}
+        }}}
+    }
+});
+
+/**
+ * list all todos of a tag
+ * 
+ * @todo return 404 if no content
+ */
+server.route({
+    method: 'GET',
+    path: '/todos/{tag_id}/todos/',
+    handler: function (request, reply) {
+        
+        function dbCallback(todos) {            
+            reply(todos).code(200);
+        };        
+        
+        database.getAllOf(dbCallback, ["title", "ordering", "completed"], "todos", "tag", request.params.tag_id);
+    },
+    config: {
+        tags: ['api'],
+        description: 'List all todos of a tag',
+        validate: {
+            params: {
+                tag_id: schemas.tagIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {description: 'Todos not found'}
+        }}}
+    }
+});
+
 //delete all todos
 server.route({
     method: 'DELETE',

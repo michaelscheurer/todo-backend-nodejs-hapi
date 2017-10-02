@@ -189,7 +189,7 @@ server.route({
             reply(tags).code(200);
         };        
         
-        database.getAllTagsOfTodo(dbCallback, request.params.todo_id);        
+        database.getAllOf(dbCallback, ["title"], "tags", "todo", request.params.todo_id);
     },
     config: {
         tags: ['api'],

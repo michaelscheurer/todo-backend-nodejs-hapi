@@ -35,36 +35,31 @@ exports.tagTodo = function (callback, todoId, tags) {
     callback("success");
 };
 
-//List all todos with a specific tag
-exports.getAllTodosOfTag = function (callback, tagId) {
-    var sql = "SELECT todos_tags.tag_id AS todos_tagsId, todos.id AS id, todos.title AS title, todos.ordering AS ordering, todos.completed AS completed FROM " + databaseName + ".todos_tags JOIN " + databaseName + ".todos ON todos_tags.todo_id = todos.id  WHERE todos_tags.tag_id = '" + tagId + "'";
+//List all x.entries from a y.id
+exports.getAllOf = function (callback, asTitles, table, ofIdTableSingular, id) {
+    var sql = "SELECT " + getAs(table, asTitles) 
+            + " FROM " + databaseName + ".todos_tags JOIN " + databaseName + "." + table 
+            + " ON todos_tags." + table.slice(0, -1) + "_id = " + table + ".id  WHERE todos_tags." + ofIdTableSingular + "_id = '" + id + "'";
+
     con.query(sql, function (err, result) {
        if(err) throw err;
-        result = processSqlToArray(result); 
         
-        console.log("Getting all todos of the tag");
+        result = processResult(result, table); 
+
         callback(result);
-    });
+    });    
 };
 
-
-//List all tags of a todo
-exports.getAllTagsOfTodo = function (callback, todoId) {
-    var sql = "SELECT todos_tags.todo_id AS todos_tagsId, tags.id AS id, tags.title AS title FROM " + databaseName + ".todos_tags JOIN " + databaseName + ".tags ON todos_tags.tag_id = tags.id  WHERE todos_tags.todo_id = '" + todoId + "'";
-    con.query(sql, function (err, result) {
-       if(err) throw err;
-        result = processSqlTagToArray(result);             
-        
-        console.log("Getting all tags of a todo");
-        callback(result);
+//helper function for getAllOf
+function getAs(table, asTitles) {
+    var sql = table + ".id AS id, ";
+    
+    asTitles.forEach(function(item) {
+        sql += table + "." + item + " AS " + item + ", ";
     });
-};
-
-/**
- * 
- *  common used queries
- * 
- */
+    
+    return sql.slice(0, -2);
+}
 
 //delete
 exports.delete = function (callback, withWhereClause, table, id) {
@@ -128,8 +123,6 @@ exports.getEntries = function (callback, withWhereClause, table, id) {
         sql = sql + " WHERE id = '" + id + "'";
     }
     
-    console.log(sql);
-    
     con.query(sql, function (err, result) {
        if(err) throw err;
 
@@ -183,7 +176,7 @@ exports.update = function (callback, setTitles, setValues, table, id) {
 
 //helper function for update
 function getSet(setTitles, setValues) {
-    
+
     var sql = "";
     
     for(var i = 0; i < setTitles.length; i++) {
