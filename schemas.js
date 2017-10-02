@@ -1,3 +1,9 @@
+/**
+ * 
+ * Defines the Swagger schemas
+ * 
+ */
+
 //tag schemas
 var tagResourceSchema = Joi.object({
     title: Joi.string(),

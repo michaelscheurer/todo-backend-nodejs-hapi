@@ -1,9 +1,8 @@
 /**
  * 
- * @todo: update a given todo
- * @todo: list all todos
+ * routes all request for todo
+ * 
  */
-
 
 //create a todo POST /todos/
 server.route({

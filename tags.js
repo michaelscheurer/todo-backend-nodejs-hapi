@@ -1,5 +1,7 @@
 /**
  * 
+ * Routes all tag requests
+ * 
  * @todo: delete all tags
  * @todo: make callback function on insert tag
  */

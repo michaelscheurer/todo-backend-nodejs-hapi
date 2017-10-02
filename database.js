@@ -1,7 +1,12 @@
+/**
+ * 
+ * Handles all database requests
+ * 
+ */
+
 var init_database = require("./initialize_database");
 var con = init_database.con;
 var databaseName = init_database.databaseName;
-
 
 //tag a todo with (optional) multiple tags
 /**
