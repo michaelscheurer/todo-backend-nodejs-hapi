@@ -4,75 +4,9 @@ var databaseName = init_database.databaseName;
 
 /**
  * 
- * TODOS TABLE
- * 
- */
-
-//get all todos using callback function
-exports.getAllTodos = function (callback) {
-    var sql = "SELECT * FROM " + databaseName + ".todos";
-    con.query(sql, function (err, result) {
-        if(err) throw err;            
-        
-        callback(processSqlToArray(result));
-    });
-};
-
-//get a specific todo by id using callback function
-exports.getTodo = function(callback, todoId) {
-    var sql = "SELECT * FROM " + databaseName +".todos WHERE id = '" + todoId + "'";
-    con.query(sql, function (err, result) {
-        if(err) throw err;
-        
-        callback(processSqlToArray(result));
-    });
-}
-
-//helper function. Brings sql request into the right order for the API
-function processSqlToArray(results) {
-    var todos = [];
-    
-    results.forEach(function(item) {
-        
-        var todo = {
-            title: item.title,
-            completed: (item.completed === 'true'),
-            order: item.ordering,
-            url: server.info.uri + '/todos/' + item.id
-        };
-        
-        todos.push(todo);
-    });
-    
-    return todos;
-};
-
-/**
- * 
  * DATABASE OPERATIONS TAGS TABLE
  * 
  */
-//get all tags from database
-exports.getAllTags = function (callback) {
-    var sql = "SELECT * FROM " + databaseName + ".tags";
-    con.query(sql, function (err, result) {
-        if(err) throw err;        
-        
-        console.log("Read all tags from database");
-        callback(processSqlTagToArray(result));
-    });
-};
-
-//get a specific tag by id from database
-exports.getTag = function (callback, tagId) {
-    var sql = "SELECT * FROM " + databaseName + ".tags WHERE id = '" + tagId + "'";
-    con.query(sql, function (err, result) {
-       if(err) throw err;
-       
-       console.log("Get tag id " + tagId);
-       callback(processSqlTagToArray(result));
-    });
-};
 
 //update tag by id
 exports.updateTag = function (callback, tagId, title) {
@@ -83,22 +17,6 @@ exports.updateTag = function (callback, tagId, title) {
         console.log("Tag updated");
         callback(result);
     });
-};
-
-//helper function to generate proper tag json object
-function processSqlTagToArray (results) {
-    var tags = [];
-    
-    results.forEach(function(item) {
-       var tag = {
-            title: item.title,
-            url: server.info.uri + '/tags/' + item.id
-       };
-       
-       tags.push(tag);
-    });
-    
-    return tags;
 };
 
 /**
@@ -145,8 +63,6 @@ exports.getAllTodosOfTag = function (callback, tagId) {
     con.query(sql, function (err, result) {
        if(err) throw err;
         result = processSqlToArray(result); 
-        
-        console.log(result);
         
         console.log("Getting all todos of the tag");
         callback(result);
@@ -225,3 +141,53 @@ function getSqlValues(values) {
     
     return sqlVAlues + ")";
 }
+
+//get
+exports.getEntries = function (callback, withWhereClause, table, id) {
+    var sql = "SELECT * FROM " + databaseName + "." + table; 
+    
+    if(withWhereClause) {
+        sql = sql + " WHERE id = '" + id + "'";
+    }
+    
+    console.log(sql);
+    
+    con.query(sql, function (err, result) {
+       if(err) throw err;
+
+       callback(processResult(result, table));
+    });    
+};
+
+
+//helper function to generate proper tag json object
+function processResult(results, table) {
+    var entries = [];
+    
+    if(table == "tags") {
+        results.forEach(function(item) {
+            var tag = {
+                title: item.title,
+                url: server.info.uri + '/tags/' + item.id
+            };
+
+            entries.push(tag);
+        });  
+    }
+    
+    else {
+        results.forEach(function(item) {        
+            var todo = {
+                title: item.title,
+                completed: (item.completed === 'true'),
+                order: item.ordering,
+                url: server.info.uri + '/todos/' + item.id
+            };
+
+            entries.push(todo);
+        });
+    }
+    
+    return entries;
+};
+

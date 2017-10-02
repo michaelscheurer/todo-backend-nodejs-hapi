@@ -3,33 +3,6 @@
  * @todo: delete all tags
  * @todo: make callback function on insert tag
  */
- 
-//list all tags GET /tags/
-server.route({
-    method: 'GET',
-    path: '/tags/',
-    handler: function (request, reply) {
-        
-        function dbCallback(tags) {
-            reply(tags).code(200);
-        };
-        
-        database.getAllTags(dbCallback);
-        
-    },
-    config: {
-        tags: ['api'],
-        description: 'List all tags',
-        plugins: {'hapi-swagger': {responses: {
-            200: {
-                description: 'Success',
-                schema: Joi.array().items(
-                    schemas.tagResourceSchema.label('Result')
-                )
-            }
-        }}}
-    }
-});
 
 //create a tag POST /tags/
 server.route({
@@ -60,6 +33,32 @@ server.route({
     }
 });
 
+//list all tags GET /tags/
+server.route({
+    method: 'GET',
+    path: '/tags/',
+    handler: function (request, reply) {
+        
+        function dbCallback(tags) {
+            reply(tags).code(200);
+        };
+        
+        database.getEntries(dbCallback, false, "tags", null);        
+    },
+    config: {
+        tags: ['api'],
+        description: 'List all tags',
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: Joi.array().items(
+                    schemas.tagResourceSchema.label('Result')
+                )
+            }
+        }}}
+    }
+});
+
 //Fetch a tag by id
 server.route({
     method: 'GET',
@@ -70,7 +69,7 @@ server.route({
             reply(tags).code(200);
         };
         
-        database.getTag(dbCallback, request.params.tag_id);
+        database.getEntries(dbCallback, true, "tags", request.params.tag_id);
     },
     config: {
         tags: ['api'],

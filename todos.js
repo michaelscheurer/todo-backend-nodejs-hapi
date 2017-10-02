@@ -2,7 +2,6 @@
  * 
  * @todo: update a given todo
  * @todo: list all todos
- * @todo: fetch a given todo
  */
 
 
@@ -42,7 +41,6 @@ server.route({
     }
 });
 
-
 //Tag a todo
 server.route({
     method: 'POST',
@@ -71,6 +69,62 @@ server.route({
                 description: 'Todo was taged',
                 schema: schemas.todoResourceSchema.label('Result')
             }
+        }}}
+    }
+});
+
+//list all todos GET /todos/
+server.route({
+    method: 'GET',
+    path: '/todos/',
+    handler: function (request, reply) {
+        
+        function dbCallback(todos) {
+            reply(todos).code(200);
+        };
+        
+        database.getEntries(dbCallback, false, "todos", null);        
+    },
+    config: {
+        tags: ['api'],
+        description: 'List all todos',
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: Joi.array().items(
+                    schemas.todoResourceSchema.label('Result')
+                )
+            }
+        }}}
+    }
+});
+
+//Fetch a todo by id
+server.route({
+    method: 'GET',
+    path: '/todos/{todo_id}',
+    handler: function (request, reply) {
+        
+        function dbCallback(todos) {            
+            reply(todos).code(200);
+        };
+        
+        database.getEntries(dbCallback, true, "todos", request.params.todo_id);
+    },
+    config: {
+        tags: ['api'],
+        description: 'Fetch a given todo',
+        validate: {
+            params: {
+                todo_id: schemas.todoIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {description: 'Todo not found'}
         }}}
     }
 });
@@ -124,40 +178,6 @@ server.route({
         plugins: {'hapi-swagger': {responses: {
             204: {description: 'Todo deleted'},
             404: {description: 'Todo not found'}
-        }}}
-    }
-});
-
-/**
- * list all todos with a specific tag
- * 
- * @todo return 404 if no content
- */
-server.route({
-    method: 'GET',
-    path: '/todos/{tag_id}/todos/',
-    handler: function (request, reply) {
-        
-        function dbCallback(todos) {            
-            reply(todos).code(200);
-        };        
-        
-        database.getAllTodosOfTag(dbCallback, request.params.tag_id);        
-    },
-    config: {
-        tags: ['api'],
-        description: 'List all todos of a tag',
-        validate: {
-            params: {
-                tag_id: schemas.tagIdSchema
-            }
-        },
-        plugins: {'hapi-swagger': {responses: {
-            200: {
-                description: 'Success',
-                schema: schemas.todoResourceSchema.label('Result')
-            },
-            404: {description: 'Todos not found'}
         }}}
     }
 });
