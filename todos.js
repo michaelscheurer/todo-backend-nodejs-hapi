@@ -1,57 +1,47 @@
-var todoResourceSchema = Joi.object({
-    title: Joi.string(),
-    completed: Joi.boolean(),
-    order: Joi.number().integer(),
-    url: Joi.string()
-});
+/**
+ * 
+ * @todo: update a given todo
+ * @todo: list all todos
+ * @todo: fetch a given todo
+ */
 
-var todoIdSchema = Joi.number().integer().positive()
-    .required().description('The Todo ID');
-    
-exports.todoResourceSchema = todoResourceSchema;
-exports.todoIdSchema = todoIdSchema;
 
-//server.route({
-//    method: 'GET',
-//    path: '/todos/',
-//    handler: function (request, reply) {
-//        
-//        function dbCallback(todos) {
-//            reply(todos).code(200);
-//        };
-//        
-//        database.getAllTodos(dbCallback);
-//        
-//    },
-//    config: {
-//        tags: ['api'],
-//        description: 'List all todos',
-//        plugins: {'hapi-swagger': {responses: {
-//            200: {
-//                description: 'Success',
-//                schema: Joi.array().items(
-//                    todoResourceSchema.label('Result')
-//                )
-//            }
-//        }}}
-//    }
-//});
-
+//create a todo POST /todos/
 server.route({
-    method: 'DELETE',
+    method: 'POST',
     path: '/todos/',
     handler: function (request, reply) {
-        todos = {};
-        reply();
+        
+        function dbCallback(result) {
+            reply(result).code(201);
+        }        
+
+        database.insert(
+            dbCallback, 
+            ["title", "ordering", "completed"], 
+            [request.payload.title, request.payload.order || 0, request.payload.completed || false], 
+            "todos"
+        );
     },
     config: {
         tags: ['api'],
-        description: 'Delete all todos',
+        description: 'Create a todo',
+        validate: {
+            payload: {
+                title: Joi.string().required(),
+                order: Joi.number().integer(),
+                completed: Joi.boolean()
+            }
+        },
         plugins: {'hapi-swagger': {responses: {
-            204: {description: 'Todos deleted'}
+            201: {
+                description: 'Created',
+                schema: schemas.todoResourceSchema.label('Result')
+            }
         }}}
     }
 });
+
 
 //Tag a todo
 server.route({
@@ -70,7 +60,7 @@ server.route({
         description: 'Tag a todo (multiple tags comma separated. Tag which does not exist will be ignored)',
         validate: {
             params: {
-                todo_id: todoIdSchema
+                todo_id: schemas.todoIdSchema
             },
             payload: {
                 titles: Joi.string().required()
@@ -79,73 +69,95 @@ server.route({
         plugins: {'hapi-swagger': {responses: {
             201: {
                 description: 'Todo was taged',
-                schema: todoResourceSchema.label('Result')
+                schema: schemas.todoResourceSchema.label('Result')
             }
         }}}
     }
 });
 
-
-
+//delete all todos
 server.route({
-    method: 'PATCH',
-    path: '/todos/{todo_id}',
+    method: 'DELETE',
+    path: '/todos/',
     handler: function (request, reply) {
-        todoId = request.params.todo_id;
-        if (! (todoId in todos)) {
-            reply().code(404);
-        } else {
-            for (var attrName in request.payload) {
-                todos[todoId][attrName] = request.payload[attrName];
-            }
-            reply(getTodo(todoId)).code(200);
+        
+        function dbCallback(result) {
+            reply(result).code(204);
         }
+        
+        database.delete(dbCallback, false, "todos", null);
     },
     config: {
         tags: ['api'],
-        description: 'Update a given todo',
+        description: 'Delete all todos',
         validate: {
             params: {
-                todo_id: todoIdSchema
-            },
-            payload: {
-                title: Joi.string(),
-                completed: Joi.boolean(),
-                order: Joi.number()
             }
         },
         plugins: {'hapi-swagger': {responses: {
-            200: {
-                description: 'Success',
-                schema: todoResourceSchema.label('Result')
-            },
-            404: {description: 'Todo not found'}
+            204: {description: 'All todos deleted'},
+            404: {description: 'No todo found'}
         }}}
     }
 });
 
+//delete a given todo
 server.route({
     method: 'DELETE',
     path: '/todos/{todo_id}',
     handler: function (request, reply) {
-        if( !(request.params.todo_id in todos)) {
-            reply('Todo Not Found').code(404);
-            return;
+         
+        function dbCallback(result) {
+            reply(result).code(204);
         }
-        delete todos[request.params.todo_id];
-        reply().code(204);
+        
+        database.delete(dbCallback, true, "todos", request.params.todo_id);
     },
     config: {
         tags: ['api'],
         description: 'Delete a given todo',
         validate: {
             params: {
-                todo_id: todoIdSchema
+                todo_id: schemas.todoIdSchema
             }
         },
         plugins: {'hapi-swagger': {responses: {
             204: {description: 'Todo deleted'},
             404: {description: 'Todo not found'}
+        }}}
+    }
+});
+
+/**
+ * list all todos with a specific tag
+ * 
+ * @todo return 404 if no content
+ */
+server.route({
+    method: 'GET',
+    path: '/todos/{tag_id}/todos/',
+    handler: function (request, reply) {
+        
+        function dbCallback(todos) {            
+            reply(todos).code(200);
+        };        
+        
+        database.getAllTodosOfTag(dbCallback, request.params.tag_id);        
+    },
+    config: {
+        tags: ['api'],
+        description: 'List all todos of a tag',
+        validate: {
+            params: {
+                tag_id: schemas.tagIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {description: 'Todos not found'}
         }}}
     }
 });

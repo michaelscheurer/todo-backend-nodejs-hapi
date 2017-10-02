@@ -3,9 +3,11 @@ global.Inert = require('inert');
 global.Vision = require('vision');
 global.HapiSwagger = require('hapi-swagger');
 global.Joi = require('joi');
+const init_database = require('./initialize_database');
 global.database = require('./database');
 const server = require('./server');
+global.schemas = require('./schemas');
 
+// Routes
 var tags = require('./tags');
 var todos = require('./todos');
-var todos_tags = require('./todos_tags');

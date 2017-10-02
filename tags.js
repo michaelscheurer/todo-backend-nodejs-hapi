@@ -1,18 +1,8 @@
 /**
  * 
+ * @todo: delete all tags
  * @todo: make callback function on insert tag
  */
-
-var tagResourceSchema = Joi.object({
-    title: Joi.string(),
-    url: Joi.string()
-});
-
-var tagIdSchema = Joi.number().integer().positive()
-    .required().description('The tag ID');
-    
-exports.tagResourceSchema = tagResourceSchema;
-exports.tagIdSchema = tagIdSchema;
  
 //list all tags GET /tags/
 server.route({
@@ -34,7 +24,7 @@ server.route({
             200: {
                 description: 'Success',
                 schema: Joi.array().items(
-                    tagResourceSchema.label('Result')
+                    schemas.tagResourceSchema.label('Result')
                 )
             }
         }}}
@@ -50,8 +40,8 @@ server.route({
         function dbCallback(result) {
             reply(result).code(201);
         }
-        
-        database.insertTag(dbCallback, request.payload.title);        
+
+        database.insert(dbCallback, ["title"], [request.payload.title], "tags");
     },
     config: {
         tags: ['api'],
@@ -64,7 +54,7 @@ server.route({
         plugins: {'hapi-swagger': {responses: {
             201: {
                 description: 'Created',
-                schema: tagResourceSchema.label('Result')
+                schema: schemas.tagResourceSchema.label('Result')
             }
         }}}
     }
@@ -87,13 +77,13 @@ server.route({
         description: 'Fetch a given tag',
         validate: {
             params: {
-                tag_id: tagIdSchema
+                tag_id: schemas.tagIdSchema
             }
         },
         plugins: {'hapi-swagger': {responses: {
             200: {
                 description: 'Success',
-                schema: tagResourceSchema.label('Result')
+                schema: schemas.tagResourceSchema.label('Result')
             },
             404: {description: 'Tag not found'}
         }}}
@@ -117,7 +107,7 @@ server.route({
         description: 'Update a given tag',
         validate: {
             params: {
-                tag_id: tagIdSchema
+                tag_id: schemas.tagIdSchema
             },
             payload: {
                 title: Joi.string()
@@ -126,13 +116,40 @@ server.route({
         plugins: {'hapi-swagger': {responses: {
             200: {
                 description: 'Success',
-                schema: tagResourceSchema.label('Result')
+                schema: schemas.tagResourceSchema.label('Result')
             },
             404: {description: 'Tag not found'}
         }}}
     }
 });
 
+//delete all tags
+server.route({
+    method: 'DELETE',
+    path: '/tags/',
+    handler: function (request, reply) {
+        
+        function dbCallback(result) {
+            reply(result).code(204);
+        }
+        
+        database.delete(dbCallback, false, "tags", null);
+    },
+    config: {
+        tags: ['api'],
+        description: 'Delete all tags',
+        validate: {
+            params: {
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            204: {description: 'All tags deleted'},
+            404: {description: 'No tag found'}
+        }}}
+    }
+});
+
+//delete tag from database by id
 server.route({
     method: 'DELETE',
     path: '/tags/{tag_id}',
@@ -142,20 +159,53 @@ server.route({
             reply(result).code(204);
         }
         
-        database.deleteTagById(dbCallback, request.params.tag_id);
-
+        database.delete(dbCallback, true, "tags", request.params.tag_id);
     },
     config: {
         tags: ['api'],
         description: 'Delete a given tag',
         validate: {
             params: {
-                tag_id: tagIdSchema
+                tag_id: schemas.tagIdSchema
             }
         },
         plugins: {'hapi-swagger': {responses: {
             204: {description: 'Tag deleted'},
             404: {description: 'Tag not found'}
+        }}}
+    }
+});
+
+/**
+ * list all tags of a todo
+ * 
+ * @todo return 404 if no content
+ */
+server.route({
+    method: 'GET',
+    path: '/tags/{todo_id}/tags/',
+    handler: function (request, reply) {
+        
+        function dbCallback(tags) {            
+            reply(tags).code(200);
+        };        
+        
+        database.getAllTagsOfTodo(dbCallback, request.params.todo_id);        
+    },
+    config: {
+        tags: ['api'],
+        description: 'List all tags of a todo',
+        validate: {
+            params: {
+                todo_id: schemas.todoIdSchema
+            }
+        },
+        plugins: {'hapi-swagger': {responses: {
+            200: {
+                description: 'Success',
+                schema: schemas.tagResourceSchema.label('Result')
+            },
+            404: {description: 'Tags not found'}
         }}}
     }
 });

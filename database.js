@@ -1,71 +1,12 @@
-/**
- * manages the mysql database operations
- */
-var mysql = require('mysql');
-
-const databaseName = "todo_backend";
-
-//database credentials
-var con = mysql.createConnection( {
-    host: "localhost",
-    user: "todo-backend",
-    password: "todo-backend"
-});
-
-//create database connection
-con.connect(function(err) {
-    if(err) throw err;
-    console.log("Connected to mysql");       
-});
-
-// Create database if not exist
-con.query("CREATE DATABASE IF NOT EXISTS "+databaseName, function (err, result) {
-if (err) throw err;
-console.log("Database created");
-});
-
-//Create tables
-//todos
-var sql = "CREATE TABLE IF NOT EXISTS "+databaseName+".todos (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255), ordering INT, completed VARCHAR(255))";
-con.query(sql, function (err, result) {
-   if (err) throw err;
-   console.log("Table todos created");
-});
-//tags
-var sql = "CREATE TABLE IF NOT EXISTS "+databaseName+".tags (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255))";
-con.query(sql, function (err, result) {
-   if (err) throw err;
-   console.log("Table tags created");
-});
-//todos_tags
-var sql = "CREATE TABLE IF NOT EXISTS "+databaseName+".todos_tags (id INT AUTO_INCREMENT PRIMARY KEY, todo_id INT, tag_id INT)";
-con.query(sql, function (err, result) {
-   if (err) throw err;
-   console.log("Table todos_tags created");
-});
+var init_database = require("./initialize_database");
+var con = init_database.con;
+var databaseName = init_database.databaseName;
 
 /**
  * 
- * DATABASE OPERATIONS TODOS TABLE
+ * TODOS TABLE
  * 
  */
-
-/**
- * Insert a new todo
- * 
- * @param {string} title
- * @param {int} ordering
- * @param {string} completed
- * @returns
- */
-exports.insertTodo = function (title, ordering, completed) {
-    var sql = "INSERT INTO "+databaseName+".todos (title, ordering, completed) VALUES('"+title+"', '"+ordering+"', '"+completed+"')";
-    con.query(sql, function (err, result) {
-       if(err) throw err;
-       console.log("Todo inserted");
-       return result;
-    });
-};
 
 //get all todos using callback function
 exports.getAllTodos = function (callback) {
@@ -133,17 +74,6 @@ exports.getTag = function (callback, tagId) {
     });
 };
 
-//insert new tag into database
-exports.insertTag = function (callback, title) {
-    var sql = "INSERT INTO "+databaseName+".tags (title) VALUES('"+title+"')";
-    con.query(sql, function (err, result) {
-        if(err) throw err;
-       
-        console.log("Tag inserted");
-        callback(result);
-    });
-};
-
 //update tag by id
 exports.updateTag = function (callback, tagId, title) {
     var sql = "UPDATE " + databaseName + ".tags SET title = '" + title + "' WHERE id = '" + tagId + "'";
@@ -152,17 +82,6 @@ exports.updateTag = function (callback, tagId, title) {
         
         console.log("Tag updated");
         callback(result);
-    });
-};
-
-//delete tag by id from database
-exports.deleteTagById = function (callback, tagId) {
-    var sql = "DELETE FROM " + databaseName + ".tags WHERE id = '" + tagId + "'";
-    con.query(sql, function(err, result) {
-       if(err) throw err;
-       
-       console.log("Tag with id " + tagId + " deleted");
-       callback(result);
     });
 };
 
@@ -246,3 +165,63 @@ exports.getAllTagsOfTodo = function (callback, todoId) {
         callback(result);
     });
 };
+
+/**
+ * 
+ *  common used queries
+ * 
+ */
+
+//delete
+exports.delete = function (callback, withWhereClause, table, id) {
+    var whereClause = "WHERE id = '" + id + "'";
+    
+    var sql = "DELETE FROM " + databaseName + "."+table;
+    
+    if(withWhereClause) {
+        sql = sql + " " + whereClause;
+    }
+    
+    con.query(sql, function(err, result) {
+       if(err) throw err;
+       
+       callback(result);
+    });
+};
+
+//create
+exports.insert = function (callback, rows, values, table) {
+
+    var sql = "INSERT INTO "+databaseName+"." + table + " " + getRowDescription(rows) + " VALUES" + getSqlValues(values);
+    
+    con.query(sql, function (err, result) {
+        if(err) throw err;
+       
+        callback(result);
+    });
+};
+
+//helper function of insert function
+function getRowDescription(rows) {
+    var rowDescriptions = "(";
+
+    rows.forEach(function(item) {
+        rowDescriptions += item + ", ";
+    });
+    rowDescriptions = rowDescriptions.slice(0, -2);    
+    
+    return rowDescriptions += ")";
+}
+
+//helper function of insert function
+function getSqlValues(values) {
+    var sqlVAlues = "(";
+
+    values.forEach(function(item) {
+        sqlVAlues += "'" + item + "', ";        
+    });
+    
+    sqlVAlues = sqlVAlues.slice(0, -2);
+    
+    return sqlVAlues + ")";
+}
