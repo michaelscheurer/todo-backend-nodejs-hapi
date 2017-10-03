@@ -13,7 +13,7 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(201);
+            replyManager.makeReply(reply, result, 201, 404);
         }
 
         database.insert(dbCallback, ["title"], [request.payload.title], "tags");
@@ -30,7 +30,8 @@ server.route({
             201: {
                 description: 'Created',
                 schema: schemas.tagResourceSchema.label('Result')
-            }
+            },
+            404: {description: 'Unable to create new tag'}
         }}}
     }
 });
@@ -41,8 +42,8 @@ server.route({
     path: '/tags/',
     handler: function (request, reply) {
         
-        function dbCallback(tags) {
-            reply(tags).code(200);
+        function dbCallback(result) {
+            replyManager.makeReply(reply, result, 200, 404);
         };
         
         database.getEntries(dbCallback, false, "tags", null);        
@@ -56,7 +57,8 @@ server.route({
                 schema: Joi.array().items(
                     schemas.tagResourceSchema.label('Result')
                 )
-            }
+            },
+            404: {description: "No tags found"}
         }}}
     }
 });
@@ -67,8 +69,8 @@ server.route({
     path: '/tags/{tag_id}',
     handler: function (request, reply) {
         
-        function dbCallback(tags) {            
-            reply(tags).code(200);
+        function dbCallback(result) {            
+            replyManager.makeReply(reply, result, 200, 404);
         };
         
         database.getEntries(dbCallback, true, "tags", request.params.tag_id);
@@ -97,8 +99,8 @@ server.route({
     path: '/tags/{tag_id}',
     handler: function (request, reply) {
         
-        function dbCallback(answer) {
-            reply(answer).code(200);
+        function dbCallback(result) {
+            replyManager.makeReply(reply, result, 200, 404);
         }
         
         database.update(dbCallback, ["title"], [request.payload.title], "tags", request.params.tag_id);
@@ -131,8 +133,8 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(204);
-        }
+            replyManager.makeReply(reply, result, 200, 404);
+        };
         
         database.delete(dbCallback, false, "tags", null);
     },
@@ -144,7 +146,7 @@ server.route({
             }
         },
         plugins: {'hapi-swagger': {responses: {
-            204: {description: 'All tags deleted'},
+            200: {description: 'All tags deleted'},
             404: {description: 'No tag found'}
         }}}
     }
@@ -157,7 +159,7 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(204);
+            replyManager.makeReply(reply, result, 200, 404);
         }
         
         database.delete(dbCallback, true, "tags", request.params.tag_id);
@@ -171,7 +173,7 @@ server.route({
             }
         },
         plugins: {'hapi-swagger': {responses: {
-            204: {description: 'Tag deleted'},
+            200: {description: 'Tag deleted'},
             404: {description: 'Tag not found'}
         }}}
     }
@@ -187,8 +189,8 @@ server.route({
     path: '/tags/{todo_id}/tags/',
     handler: function (request, reply) {
         
-        function dbCallback(tags) {            
-            reply(tags).code(200);
+        function dbCallback(result) {            
+            replyManager.makeReply(reply, result, 200, 404);
         };        
         
         database.getAllOf(dbCallback, ["title"], "tags", "todo", request.params.todo_id);

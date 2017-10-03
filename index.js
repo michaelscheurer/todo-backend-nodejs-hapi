@@ -7,6 +7,7 @@ const init_database = require('./initialize_database');
 global.database = require('./database');
 const server = require('./server');
 global.schemas = require('./schemas');
+global.replyManager = require('./replyManager');
 
 // Routes
 var tags = require('./tags');

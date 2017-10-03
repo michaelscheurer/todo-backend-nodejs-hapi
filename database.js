@@ -16,11 +16,11 @@ var databaseName = init_database.databaseName;
  * @todo: return json result to callback function
  */
 exports.tagTodo = function (callback, todoId, tags) {
-    splitedTags = tags.split(",");
-    console.log(splitedTags);
+    splitedTags = tags.split(",");   
     
     //Check each tag, if already in table.
     splitedTags.forEach( function (item) {
+        item = item.trim();
         var sql = "SELECT id FROM " + databaseName + ".tags WHERE title = '" + item + "'";
         con.query(sql, function (err, result) {
             if(err) throw err;
@@ -78,7 +78,7 @@ exports.delete = function (callback, withWhereClause, table, id) {
     
     con.query(sql, function(err, result) {
        if(err) throw err;
-       
+
        callback(result);
     });
 };
