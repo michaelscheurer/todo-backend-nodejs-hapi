@@ -11,7 +11,7 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(201);
+            replyManager.makeReply(reply, result, 201, 404);
         }        
 
         database.insert(
@@ -35,6 +35,9 @@ server.route({
             201: {
                 description: 'Created',
                 schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {
+                description: 'Todo could not be created'
             }
         }}}
     }
@@ -47,7 +50,7 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(201);
+            replyManager.makeReply(reply, result, 201, 404);
         }
         
         database.tagTodo(dbCallback, request.params.todo_id, request.payload.titles);        
@@ -67,6 +70,9 @@ server.route({
             201: {
                 description: 'Todo was taged',
                 schema: schemas.todoResourceSchema.label('Result')
+            },
+            404: {
+                description: 'Todo could not be taged'
             }
         }}}
     }
@@ -78,8 +84,8 @@ server.route({
     path: '/todos/',
     handler: function (request, reply) {
         
-        function dbCallback(todos) {
-            reply(todos).code(200);
+        function dbCallback(result) {
+            replyManager.makeReply(reply, result, 200, 404);
         };
         
         database.getEntries(dbCallback, false, "todos", null);        
@@ -93,6 +99,9 @@ server.route({
                 schema: Joi.array().items(
                     schemas.todoResourceSchema.label('Result')
                 )
+            },
+            404: {
+                description: 'No todos found'
             }
         }}}
     }
@@ -104,8 +113,8 @@ server.route({
     path: '/todos/{todo_id}',
     handler: function (request, reply) {
         
-        function dbCallback(todos) {            
-            reply(todos).code(200);
+        function dbCallback(result) {            
+            replyManager.makeReply(reply, result, 200, 404);
         };
         
         database.getEntries(dbCallback, true, "todos", request.params.todo_id);
@@ -134,8 +143,8 @@ server.route({
     path: '/todos/{todo_id}',
     handler: function (request, reply) {
         
-        function dbCallback(todos) {
-            reply(todos).code(200);
+        function dbCallback(result) {
+            replyManager.makeReply(reply, result, 200, 404);
         }
         
         database.update(
@@ -178,8 +187,8 @@ server.route({
     path: '/todos/{tag_id}/todos/',
     handler: function (request, reply) {
         
-        function dbCallback(todos) {            
-            reply(todos).code(200);
+        function dbCallback(result) {            
+            replyManager.makeReply(reply, result, 200, 404);
         };        
         
         database.getAllOf(dbCallback, ["title", "ordering", "completed"], "todos", "tag", request.params.tag_id);
@@ -209,7 +218,7 @@ server.route({
     handler: function (request, reply) {
         
         function dbCallback(result) {
-            reply(result).code(204);
+            replyManager.makeReply(reply, result, 200, 404);
         }
         
         database.delete(dbCallback, false, "todos", null);
@@ -222,7 +231,7 @@ server.route({
             }
         },
         plugins: {'hapi-swagger': {responses: {
-            204: {description: 'All todos deleted'},
+            200: {description: 'All todos deleted'},
             404: {description: 'No todo found'}
         }}}
     }
@@ -235,7 +244,7 @@ server.route({
     handler: function (request, reply) {
          
         function dbCallback(result) {
-            reply(result).code(204);
+            replyManager.makeReply(reply, result, 200, 404);
         }
         
         database.delete(dbCallback, true, "todos", request.params.todo_id);
@@ -249,7 +258,7 @@ server.route({
             }
         },
         plugins: {'hapi-swagger': {responses: {
-            204: {description: 'Todo deleted'},
+            200: {description: 'Todo deleted'},
             404: {description: 'Todo not found'}
         }}}
     }
