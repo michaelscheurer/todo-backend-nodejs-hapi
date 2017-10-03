@@ -46,7 +46,7 @@ server.route({
 //Tag a todo
 server.route({
     method: 'POST',
-    path: '/todos/{todo_id}',
+    path: '/todos/{todo_id}/tags/',
     handler: function (request, reply) {
         
         function dbCallback(result) {
@@ -177,11 +177,7 @@ server.route({
     }
 });
 
-/**
- * list all todos of a tag
- * 
- * @todo return 404 if no content
- */
+//list all todos of a tag
 server.route({
     method: 'GET',
     path: '/todos/{tag_id}/todos/',

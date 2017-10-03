@@ -1,8 +1,8 @@
 /**
  * initializes the database
  */
-var mysql = require('mysql');
 
+var mysql = require('mysql');
 const databaseName = "todo_backend";
 
 //database credentials

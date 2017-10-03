@@ -12,13 +12,6 @@ You can run validate the application with https://www.todobackend.com/specs/inde
 ## Database
 The application uses mysql as a persitant database
 
-database credentials can be found in the database.js file
+Please set up the database credentials in the initialize_database.js file
 
 A running mysql database is required
-
-## server
-
-## tags
-
-## todos
-

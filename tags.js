@@ -2,8 +2,6 @@
  * 
  * Routes all tag requests
  * 
- * @todo: delete all tags
- * @todo: make callback function on insert tag
  */
 
 //create a tag POST /tags/
@@ -179,11 +177,7 @@ server.route({
     }
 });
 
-/**
- * list all tags of a todo
- * 
- * @todo return 404 if no content
- */
+//list all tags of a todo
 server.route({
     method: 'GET',
     path: '/tags/{todo_id}/tags/',

@@ -10,13 +10,15 @@ var databaseName = init_database.databaseName;
 
 //tag a todo with (optional) multiple tags
 /**
- * @todo: check if the combination of todo_id and tag_id exists
- * @todo: check, if todo_id exists
  * @todo: create new tag, if not exists
- * @todo: return json result to callback function
  */
 exports.tagTodo = function (callback, todoId, tags) {
-    splitedTags = tags.split(",");   
+    splitedTags = tags.split(",");
+    
+    var callbackValue = [];
+    var loopCheck = 0;
+    var callbackCounter = 0;
+    var callbackChecker = 0;
     
     //Check each tag, if already in table.
     splitedTags.forEach( function (item) {
@@ -28,16 +30,27 @@ exports.tagTodo = function (callback, todoId, tags) {
             result = JSON.parse(JSON.stringify(result));
             
             if(result.length != 0) {
+                callbackCounter ++;
                 //insert into tags_todos
                 var sqlTodosTags = "INSERT INTO " + databaseName + ".todos_tags (todo_id, tag_id) VALUES ('" + todoId + "', '" + result[0].id + "')";
                 con.query(sqlTodosTags, function(err, resultTodosTags) {
-                   if(err) throw err;                   
+                    if(err) {
+                        throw err;
+                    }
+                    callbackChecker ++;
+                    callbackValue.push(resultTodosTags);
+                    internalCallback();
                 });
             }
         });
-    });  
+        loopCheck ++;
+    });
     
-    callback("success");
+    function internalCallback(){
+        if(splitedTags.length == loopCheck && callbackCounter == callbackChecker) {
+            callback(callbackValue);
+        }
+    }
 };
 
 //List all x.entries from a y.id
